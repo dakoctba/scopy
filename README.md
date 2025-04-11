@@ -1,79 +1,173 @@
 # Scopy - Smart Copy
 
-Scopy é uma ferramenta de linha de comando escrita em Go que permite copiar o conteúdo de arquivos com extensões específicas de forma inteligente, respeitando configurações de exclusão e formatos personalizados.
+Scopy is a command-line tool written in Go that allows you to intelligently copy the content of files with specific extensions, respecting exclusion settings and custom formats.
 
-## Instalação
+## Features
+
+- Recursive directory processing
+- File extension filtering
+- File/directory exclusion by patterns
+- File size limit
+- Custom header formatting
+- List-only mode
+- Detailed processing statistics
+- Support for different comment formats
+- Intuitive command-line interface using Cobra
+
+## Installation
+
+### Prerequisites
+
+- Go 1.21 or higher
+
+### Installation via go install
 
 ```bash
 go install github.com/dakoctba/scopy@latest
 ```
 
-## Uso
+### Manual Installation
 
+1. Clone the repository:
 ```bash
-scopy [opções] extensão1 extensão2 ...
+git clone https://github.com/dakoctba/scopy.git
+cd scopy
 ```
 
-### Opções
+2. Build the project:
+```bash
+go build
+```
 
-- `--header-format FORMAT` - Define o formato do cabeçalho que precede cada arquivo
-  - O formato deve aceitar `%s` como placeholder para o caminho do arquivo
-  - Exemplo: `--header-format "/* %s */"`
-  - Valor padrão: `// %s`
+3. (Optional) Install the binary:
+```bash
+go install
+```
 
-- `--exclude PATTERNS` - Define padrões para excluir arquivos/diretórios
-  - Aceita uma lista separada por vírgulas
-  - Exemplo: `--exclude "node_modules,build,tmp"`
-
-- `--list-only` - Apenas lista os arquivos que seriam copiados, sem mostrar seu conteúdo
-
-- `--max-size SIZE` - Define o tamanho máximo dos arquivos a serem incluídos
-  - Deve aceitar sufixos como KB, MB, GB
-  - Exemplo: `--max-size 1MB`
-
-- `--strip-comments` - Remove comentários dos arquivos de código
-  - Deve suportar diferentes formatos de comentários com base na extensão do arquivo
-
-- `--help` - Exibe ajuda e informações de uso
-
-- `--version` - Exibe a versão do aplicativo
-
-### Exemplos
+## Usage
 
 ```bash
-# Copia arquivos .go e .js
+scopy [options] extension1 extension2 ...
+```
+
+### Options
+
+| Flag | Short | Description | Example |
+|------|-------|-------------|---------|
+| `--header-format` | `-f` | Format of the header preceding each file | `--header-format "/* %s */"` |
+| `--exclude` | `-e` | Patterns to exclude files/directories (comma-separated) | `--exclude "vendor,dist"` |
+| `--list-only` | `-l` | Only list files that would be copied | `--list-only` |
+| `--max-size` | `-s` | Maximum size of files to include | `--max-size 500KB` |
+| `--strip-comments` | `-c` | Remove comments from code files | `--strip-comments` |
+
+### Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `version` | Display the application version | `scopy version` |
+
+### Examples
+
+```bash
+# Copy .go and .js files
 scopy go js
 
-# Customiza o formato do cabeçalho
-scopy --header-format "/* %s */" go
+# Customize header format
+scopy -f "/* %s */" go
 
-# Ignora diretórios vendor e dist
-scopy --exclude "vendor,dist" go js
+# Ignore vendor and dist directories
+scopy -e "vendor,dist" go js
 
-# Lista apenas arquivos .go sem mostrar conteúdo
-scopy --list-only go
+# List only .go files without showing content
+scopy -l go
 
-# Ignora arquivos .go maiores que 500KB
-scopy --max-size 500KB go
+# Ignore .go files larger than 500KB
+scopy -s 500KB go
 
-# Remove comentários dos arquivos copiados
-scopy --strip-comments go js
+# Remove comments from copied files
+scopy -c go js
 ```
 
-## Estatísticas
+## Statistics
 
-Ao final da execução, o Scopy exibe estatísticas sobre os arquivos processados:
-- Número total de arquivos processados
-- Número de arquivos por extensão
-- Tamanho total em bytes
-- Número total de linhas copiadas
+At the end of execution, Scopy displays detailed statistics about the processed files:
 
-## Códigos de retorno
+- Total number of files processed
+- Number of files per extension
+- Total size in bytes
+- Total number of lines copied
 
-- 0: Execução bem-sucedida
-- 1: Erro de uso (argumentos inválidos)
-- 2: Erro ao ler/processar arquivos
+## Return Codes
 
-## Licença
+| Code | Description |
+|------|-------------|
+| 0 | Successful execution |
+| 1 | Usage error (invalid arguments) |
+| 2 | Error reading/processing files |
 
-MIT License - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+## Project Structure
+
+```
+.
+├── cmd/
+│   └── root.go      # Main command and configurations
+├── pkg/
+│   ├── processor.go # File processing logic
+│   └── processor_test.go # Unit tests
+├── main.go          # Entry point
+├── go.mod           # Dependency management
+└── README.md        # Documentation
+```
+
+## Development
+
+### Development Requirements
+
+- Go 1.21 or higher
+- Git
+
+### Environment Setup
+
+1. Clone the repository:
+```bash
+git clone https://github.com/dakoctba/scopy.git
+cd scopy
+```
+
+2. Install dependencies:
+```bash
+go mod tidy
+```
+
+### Running Tests
+
+```bash
+go test ./pkg/...
+```
+
+### Building the Project
+
+```bash
+go build
+```
+
+## Contributing
+
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Author
+
+- **Jackson** - [dakoctba](https://github.com/dakoctba)
+
+## Acknowledgments
+
+- [Cobra](https://github.com/spf13/cobra) - Library for creating CLI applications in Go
+- [Go](https://golang.org/) - Programming language
