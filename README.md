@@ -9,7 +9,6 @@ Scopy is a command-line tool written in Go that allows you to intelligently copy
 - File/directory exclusion by patterns
 - File size limit
 - Custom header formatting
-- List-only mode
 - Detailed processing statistics
 - Support for different comment formats
 - Intuitive command-line interface using Cobra
@@ -54,9 +53,9 @@ scopy [options] extension1 extension2 ...
 
 | Flag | Short | Description | Example |
 |------|-------|-------------|---------|
-| `--header-format` | `-f` | Format of the header preceding each file | `--header-format "/* %s */"` |
+| `--header-format` | `-f` | Format of the header preceding each file (default: "// file: %s") | `--header-format "/* %s */"` |
 | `--exclude` | `-e` | Patterns to exclude files/directories (comma-separated) | `--exclude "vendor,dist"` |
-| `--list-only` | `-l` | Only list files that would be copied | `--list-only` |
+| `--list-only` | `-l` | Only list files that would be copied (default: true) | `--list-only=false` |
 | `--max-size` | `-s` | Maximum size of files to include | `--max-size 500KB` |
 | `--strip-comments` | `-c` | Remove comments from code files | `--strip-comments` |
 
@@ -69,17 +68,17 @@ scopy [options] extension1 extension2 ...
 ### Examples
 
 ```bash
-# Copy .go and .js files
+# List .go and .js files (default behavior)
 scopy go js
+
+# Show content of .go and .js files
+scopy --list-only=false go js
 
 # Customize header format
 scopy -f "/* %s */" go
 
 # Ignore vendor and dist directories
 scopy -e "vendor,dist" go js
-
-# List only .go files without showing content
-scopy -l go
 
 # Ignore .go files larger than 500KB
 scopy -s 500KB go

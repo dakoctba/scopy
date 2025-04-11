@@ -23,17 +23,17 @@ var (
 
 // rootCmd represents the base command
 var rootCmd = &cobra.Command{
-	Use:   "scopy [extensões...]",
-	Short: "Smart Copy - Copia conteúdo de arquivos com extensões específicas",
-	Long: `Scopy é uma ferramenta de linha de comando que permite copiar o conteúdo
-de arquivos com extensões específicas de forma inteligente, respeitando
-configurações de exclusão e formatos personalizados.`,
-	Example: `  scopy go js                               # Copia arquivos .go e .js
-  scopy --header-format "/* %s */" go       # Customiza o formato do cabeçalho
-  scopy --exclude "vendor,dist" go js       # Ignora diretórios vendor e dist
-  scopy --list-only go                      # Lista apenas arquivos .go sem mostrar conteúdo
-  scopy --max-size 500KB go                 # Ignora arquivos .go maiores que 500KB
-  scopy --strip-comments go js              # Remove comentários dos arquivos copiados`,
+	Use:   "scopy [extensions...]",
+	Short: "Smart Copy - Copy content from files with specific extensions",
+	Long: `Scopy is a command line tool that allows copying content
+from files with specific extensions intelligently, respecting
+exclusion settings and custom formats.`,
+	Example: `  scopy go js                               # Copy .go and .js files
+  scopy --header-format "/* %s */" go       # Customize header format
+  scopy --exclude "vendor,dist" go js       # Ignore vendor and dist directories
+  scopy --list-only go                      # List only .go files without showing content
+  scopy --max-size 500KB go                 # Ignore .go files larger than 500KB
+  scopy --strip-comments go js              # Remove comments from copied files`,
 	Args: cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Convert maximum size to bytes
@@ -42,7 +42,7 @@ configurações de exclusão e formatos personalizados.`,
 			var err error
 			maxSizeBytes, err = parseSize(maxSize)
 			if err != nil {
-				return fmt.Errorf("erro ao analisar tamanho máximo: %v", err)
+				return fmt.Errorf("error parsing maximum size: %v", err)
 			}
 		}
 
@@ -59,19 +59,19 @@ configurações de exclusão e formatos personalizados.`,
 		processor := pkg.NewProcessor(config)
 		err := processor.Process(".")
 		if err != nil {
-			return fmt.Errorf("erro ao processar arquivos: %v", err)
+			return fmt.Errorf("error processing files: %v", err)
 		}
 
 		// Display statistics
 		stats := processor.GetStats()
-		fmt.Printf("\nEstatísticas:\n")
-		fmt.Printf("Total de arquivos: %d\n", stats.TotalFiles)
-		fmt.Printf("Arquivos por extensão:\n")
+		fmt.Printf("\nStatistics:\n")
+		fmt.Printf("Total files: %d\n", stats.TotalFiles)
+		fmt.Printf("Files by extension:\n")
 		for ext, count := range stats.FilesByExt {
 			fmt.Printf("  %s: %d\n", ext, count)
 		}
-		fmt.Printf("Total de bytes: %d\n", stats.TotalBytes)
-		fmt.Printf("Total de linhas: %d\n", stats.TotalLines)
+		fmt.Printf("Total bytes: %d\n", stats.TotalBytes)
+		fmt.Printf("Total lines: %d\n", stats.TotalLines)
 
 		return nil
 	},
@@ -102,17 +102,17 @@ func parseSize(sizeStr string) (int64, error) {
 
 func init() {
 	rootCmd.Flags().StringVarP(&headerFormat, "header-format", "f", "// file: %s", "Format of the header that precedes each file")
-	rootCmd.Flags().StringVarP(&excludePatterns, "exclude", "e", "", "Padrões para excluir arquivos/diretórios (separados por vírgula)")
-	rootCmd.Flags().BoolVarP(&listOnly, "list-only", "l", false, "Apenas lista os arquivos que seriam copiados")
-	rootCmd.Flags().StringVarP(&maxSize, "max-size", "s", "", "Tamanho máximo dos arquivos a serem incluídos")
-	rootCmd.Flags().BoolVarP(&stripComments, "strip-comments", "c", false, "Remove comentários dos arquivos de código")
+	rootCmd.Flags().StringVarP(&excludePatterns, "exclude", "e", "", "Patterns to exclude files/directories (comma-separated)")
+	rootCmd.Flags().BoolVarP(&listOnly, "list-only", "l", true, "Only list files that would be copied (default: true)")
+	rootCmd.Flags().StringVarP(&maxSize, "max-size", "s", "", "Maximum size of files to be included")
+	rootCmd.Flags().BoolVarP(&stripComments, "strip-comments", "c", false, "Remove comments from code files")
 
 	// Add version command
 	rootCmd.AddCommand(&cobra.Command{
 		Use:   "version",
-		Short: "Exibe a versão do aplicativo",
+		Short: "Display application version",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("scopy versão %s\n", version)
+			fmt.Printf("scopy version %s\n", version)
 		},
 	})
 }

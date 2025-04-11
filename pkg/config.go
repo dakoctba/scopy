@@ -56,7 +56,7 @@ func (c *AppConfig) PrintUsage() {
 	fmt.Println("Options:")
 	fmt.Println("  -i <file>    Input file path")
 	fmt.Println("  -o <file>    Output file path (optional)")
-	fmt.Println("  -f <format>  Header format (default: 'file: %s')")
+	fmt.Printf("  -f <format>  Header format (default: 'file: %%s')\n")
 	fmt.Println("  -h           Show this help message")
 	fmt.Println("  -v           Show version information")
 	fmt.Println("\nExample:")
