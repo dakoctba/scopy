@@ -8,7 +8,8 @@ import (
 	"strings"
 )
 
-// Config contém as configurações para o processamento de arquivos
+// file: /Users/jackson/workspace/meus_projetos/scopy/pkg/processor.go
+// Config contains the settings for file processing
 type Config struct {
 	HeaderFormat    string
 	ExcludePatterns []string
@@ -18,13 +19,13 @@ type Config struct {
 	Extensions      []string
 }
 
-// Processor é responsável por processar os arquivos
+// Processor is responsible for processing files
 type Processor struct {
 	config Config
 	stats  Stats
 }
 
-// Stats contém as estatísticas do processamento
+// Stats contains the processing statistics
 type Stats struct {
 	TotalFiles int
 	FilesByExt map[string]int
@@ -32,7 +33,7 @@ type Stats struct {
 	TotalLines int
 }
 
-// NewProcessor cria uma nova instância do Processor
+// NewProcessor creates a new Processor instance
 func NewProcessor(config Config) *Processor {
 	return &Processor{
 		config: config,
@@ -42,51 +43,51 @@ func NewProcessor(config Config) *Processor {
 	}
 }
 
-// Process inicia o processamento dos arquivos
+// Process starts the file processing
 func (p *Processor) Process(baseDir string) error {
 	return filepath.Walk(baseDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		// Ignora diretórios
+		// Ignore directories
 		if info.IsDir() {
 			return nil
 		}
 
-		// Verifica se o arquivo deve ser excluído
+		// Check if file should be excluded
 		if p.shouldExclude(path) {
 			return nil
 		}
 
-		// Verifica a extensão do arquivo
+		// Check file extension
 		ext := strings.ToLower(filepath.Ext(path))
 		if !p.hasValidExtension(ext) {
 			return nil
 		}
 
-		// Verifica o tamanho máximo
+		// Check maximum size
 		if p.config.MaxSize > 0 && info.Size() > p.config.MaxSize {
 			return nil
 		}
 
-		// Atualiza estatísticas
+		// Update statistics
 		p.stats.TotalFiles++
 		p.stats.FilesByExt[ext]++
 		p.stats.TotalBytes += info.Size()
 
-		// Se for apenas listar, imprime o caminho e retorna
+		// If only listing, print path and return
 		if p.config.ListOnly {
 			fmt.Println(path)
 			return nil
 		}
 
-		// Processa o arquivo
+		// Process the file
 		return p.processFile(path)
 	})
 }
 
-// GetStats retorna as estatísticas do processamento
+// GetStats returns the processing statistics
 func (p *Processor) GetStats() Stats {
 	return p.stats
 }
@@ -105,11 +106,11 @@ func (p *Processor) hasValidExtension(ext string) bool {
 		return false
 	}
 
-	// Remove o ponto da extensão se presente
+	// Remove dot from extension if present
 	ext = strings.TrimPrefix(ext, ".")
 
 	for _, validExt := range p.config.Extensions {
-		// Remove o ponto da extensão válida se presente
+		// Remove dot from valid extension if present
 		validExt = strings.TrimPrefix(validExt, ".")
 		if strings.ToLower(validExt) == ext {
 			return true
@@ -125,15 +126,15 @@ func (p *Processor) processFile(path string) error {
 	}
 	defer file.Close()
 
-	// Imprime o cabeçalho
+	// Print header
 	fmt.Printf(p.config.HeaderFormat+"\n", path)
 
-	// Copia o conteúdo do arquivo
+	// Copy file content
 	_, err = io.Copy(os.Stdout, file)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println() // Adiciona uma linha em branco entre arquivos
+	fmt.Println() // Add blank line between files
 	return nil
 }

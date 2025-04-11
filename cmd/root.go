@@ -21,7 +21,7 @@ var (
 	stripComments   bool
 )
 
-// rootCmd representa o comando base
+// rootCmd represents the base command
 var rootCmd = &cobra.Command{
 	Use:   "scopy [extensões...]",
 	Short: "Smart Copy - Copia conteúdo de arquivos com extensões específicas",
@@ -36,7 +36,7 @@ configurações de exclusão e formatos personalizados.`,
   scopy --strip-comments go js              # Remove comentários dos arquivos copiados`,
 	Args: cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// Converte o tamanho máximo para bytes
+		// Convert maximum size to bytes
 		var maxSizeBytes int64
 		if maxSize != "" {
 			var err error
@@ -46,7 +46,7 @@ configurações de exclusão e formatos personalizados.`,
 			}
 		}
 
-		// Configura o processador
+		// Configure processor
 		config := pkg.Config{
 			HeaderFormat:    headerFormat,
 			ExcludePatterns: strings.Split(excludePatterns, ","),
@@ -62,7 +62,7 @@ configurações de exclusão e formatos personalizados.`,
 			return fmt.Errorf("erro ao processar arquivos: %v", err)
 		}
 
-		// Exibe estatísticas
+		// Display statistics
 		stats := processor.GetStats()
 		fmt.Printf("\nEstatísticas:\n")
 		fmt.Printf("Total de arquivos: %d\n", stats.TotalFiles)
@@ -101,13 +101,13 @@ func parseSize(sizeStr string) (int64, error) {
 }
 
 func init() {
-	rootCmd.Flags().StringVarP(&headerFormat, "header-format", "f", "// %s", "Formato do cabeçalho que precede cada arquivo")
+	rootCmd.Flags().StringVarP(&headerFormat, "header-format", "f", "// file: %s", "Format of the header that precedes each file")
 	rootCmd.Flags().StringVarP(&excludePatterns, "exclude", "e", "", "Padrões para excluir arquivos/diretórios (separados por vírgula)")
 	rootCmd.Flags().BoolVarP(&listOnly, "list-only", "l", false, "Apenas lista os arquivos que seriam copiados")
 	rootCmd.Flags().StringVarP(&maxSize, "max-size", "s", "", "Tamanho máximo dos arquivos a serem incluídos")
 	rootCmd.Flags().BoolVarP(&stripComments, "strip-comments", "c", false, "Remove comentários dos arquivos de código")
 
-	// Adiciona comando de versão
+	// Add version command
 	rootCmd.AddCommand(&cobra.Command{
 		Use:   "version",
 		Short: "Exibe a versão do aplicativo",
@@ -117,7 +117,7 @@ func init() {
 	})
 }
 
-// Execute adiciona todos os comandos filhos ao comando raiz e configura as flags apropriadamente.
+// Execute adds all child commands to the root command and sets flags appropriately.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
