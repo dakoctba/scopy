@@ -112,7 +112,7 @@ When running Scopy without output redirection, the content of the files is autom
 
 The terminal will only display:
 1. A confirmation message when content is copied to clipboard
-2. Detailed statistics about the processed files
+2. Statistics about the processed files
 
 ## Gitignore Support
 
@@ -128,12 +128,14 @@ You can still use the `--exclude` flag to add additional patterns that should be
 
 ## Statistics
 
-At the end of execution, Scopy displays detailed statistics about the processed files:
+At the end of execution, Scopy displays statistics about the processed files directly to the terminal:
 
 - Total number of files processed
 - Number of files per extension
 - Total size in bytes
 - Total number of lines copied
+
+The statistics are always displayed to stderr, ensuring they don't interfere with output redirection.
 
 ## Return Codes
 
