@@ -7,8 +7,10 @@ Scopy is a command-line tool written in Go that allows you to intelligently copy
 - Recursive directory processing
 - File extension filtering
 - File/directory exclusion by patterns
+- Automatic .gitignore support
 - File size limit
 - Custom header formatting
+- Automatic clipboard copy
 - Detailed processing statistics
 - Support for different comment formats
 - Intuitive command-line interface using Cobra
@@ -55,7 +57,7 @@ scopy [options] extension1 extension2 ...
 |------|-------|-------------|---------|
 | `--header-format` | `-f` | Format of the header preceding each file (default: "// file: %s") | `--header-format "/* %s */"` |
 | `--exclude` | `-e` | Patterns to exclude files/directories (comma-separated) | `--exclude "vendor,dist"` |
-| `--list-only` | `-l` | Only list files that would be copied (default: true) | `--list-only=false` |
+| `--list-only` | `-l` | Only list file paths without showing content | `--list-only` |
 | `--max-size` | `-s` | Maximum size of files to include | `--max-size 500KB` |
 | `--strip-comments` | `-c` | Remove comments from code files | `--strip-comments` |
 
@@ -68,11 +70,11 @@ scopy [options] extension1 extension2 ...
 ### Examples
 
 ```bash
-# List .go and .js files (default behavior)
+# Copy content of .go and .js files (default behavior)
 scopy go js
 
-# Show content of .go and .js files
-scopy --list-only=false go js
+# List only file paths without showing content
+scopy --list-only go js
 
 # Customize header format
 scopy -f "/* %s */" go
@@ -86,6 +88,43 @@ scopy -s 500KB go
 # Remove comments from copied files
 scopy -c go js
 ```
+
+## Output Behavior
+
+Scopy has different output behaviors depending on how it's used:
+
+1. **With redirection** (`scopy go js > output.txt`):
+   - Content is written to stdout (redirected to file)
+   - Statistics are shown in the terminal (stderr)
+
+2. **Without redirection** (`scopy go js`):
+   - Content is copied to clipboard
+   - Only statistics are shown in the terminal
+   - No content is displayed in the terminal
+
+3. **With --list-only flag** (`scopy --list-only go js`):
+   - Only file paths are listed
+   - Statistics are shown in the terminal
+
+## Clipboard Support
+
+When running Scopy without output redirection, the content of the files is automatically copied to your system's clipboard. This makes it easy to paste the content into any application.
+
+The terminal will only display:
+1. A confirmation message when content is copied to clipboard
+2. Detailed statistics about the processed files
+
+## Gitignore Support
+
+Scopy automatically reads and respects the `.gitignore` file in your project directory. This means that files and directories listed in your `.gitignore` will be automatically excluded from processing, including:
+
+- `node_modules/`
+- `.env` files
+- Build artifacts
+- Log files
+- And any other patterns you've specified in your `.gitignore`
+
+You can still use the `--exclude` flag to add additional patterns that should be ignored.
 
 ## Statistics
 

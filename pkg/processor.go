@@ -17,12 +17,15 @@ type Config struct {
 	MaxSize         int64
 	StripComments   bool
 	Extensions      []string
+	OutputToMemory  bool
 }
 
 // Processor is responsible for processing files
 type Processor struct {
-	config Config
-	stats  Stats
+	config    Config
+	stats     Stats
+	gitIgnore *GitIgnore
+	output    strings.Builder
 }
 
 // Stats contains the processing statistics
@@ -36,15 +39,22 @@ type Stats struct {
 // NewProcessor creates a new Processor instance
 func NewProcessor(config Config) *Processor {
 	return &Processor{
-		config: config,
-		stats: Stats{
-			FilesByExt: make(map[string]int),
-		},
+		config:    config,
+		stats:     Stats{FilesByExt: make(map[string]int)},
+		gitIgnore: NewGitIgnore(),
 	}
 }
 
 // Process starts the file processing
 func (p *Processor) Process(baseDir string) error {
+	// Try to load .gitignore
+	gitIgnorePath := filepath.Join(baseDir, ".gitignore")
+	if _, err := os.Stat(gitIgnorePath); err == nil {
+		if err := p.gitIgnore.Load(gitIgnorePath); err != nil {
+			return fmt.Errorf("error loading .gitignore: %v", err)
+		}
+	}
+
 	return filepath.Walk(baseDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -55,7 +65,12 @@ func (p *Processor) Process(baseDir string) error {
 			return nil
 		}
 
-		// Check if file should be excluded
+		// Check if file should be excluded by .gitignore
+		if p.gitIgnore.ShouldIgnore(path) {
+			return nil
+		}
+
+		// Check if file should be excluded by patterns
 		if p.shouldExclude(path) {
 			return nil
 		}
@@ -78,7 +93,11 @@ func (p *Processor) Process(baseDir string) error {
 
 		// If only listing, print path and return
 		if p.config.ListOnly {
-			fmt.Println(path)
+			if p.config.OutputToMemory {
+				p.output.WriteString(path + "\n")
+			} else {
+				fmt.Println(path)
+			}
 			return nil
 		}
 
@@ -90,6 +109,11 @@ func (p *Processor) Process(baseDir string) error {
 // GetStats returns the processing statistics
 func (p *Processor) GetStats() Stats {
 	return p.stats
+}
+
+// GetOutput returns the output stored in memory
+func (p *Processor) GetOutput() string {
+	return p.output.String()
 }
 
 func (p *Processor) shouldExclude(path string) bool {
@@ -126,15 +150,27 @@ func (p *Processor) processFile(path string) error {
 	}
 	defer file.Close()
 
-	// Print header
-	fmt.Printf(p.config.HeaderFormat+"\n", path)
+	// Format header
+	header := fmt.Sprintf(p.config.HeaderFormat+"\n", path)
 
-	// Copy file content
-	_, err = io.Copy(os.Stdout, file)
-	if err != nil {
-		return err
+	// Write header and content
+	if p.config.OutputToMemory {
+		p.output.WriteString(header)
+		content, err := io.ReadAll(file)
+		if err != nil {
+			return err
+		}
+		p.output.Write(content)
+		p.output.WriteString("\n")
+	} else {
+		// Write directly to stdout for redirection
+		fmt.Print(header)
+		_, err = io.Copy(os.Stdout, file)
+		if err != nil {
+			return err
+		}
+		fmt.Println() // Add blank line between files
 	}
 
-	fmt.Println() // Add blank line between files
 	return nil
 }

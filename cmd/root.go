@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/atotto/clipboard"
 	"github.com/dakoctba/scopy/pkg"
 	"github.com/spf13/cobra"
 )
@@ -46,6 +47,12 @@ exclusion settings and custom formats.`,
 			}
 		}
 
+		// Check if output is being redirected
+		isRedirected := false
+		if fileInfo, _ := os.Stdout.Stat(); (fileInfo.Mode() & os.ModeCharDevice) == 0 {
+			isRedirected = true
+		}
+
 		// Configure processor
 		config := pkg.Config{
 			HeaderFormat:    headerFormat,
@@ -54,6 +61,7 @@ exclusion settings and custom formats.`,
 			MaxSize:         maxSizeBytes,
 			StripComments:   stripComments,
 			Extensions:      args,
+			OutputToMemory:  !isRedirected, // Store in memory if NOT redirected
 		}
 
 		processor := pkg.NewProcessor(config)
@@ -62,16 +70,26 @@ exclusion settings and custom formats.`,
 			return fmt.Errorf("error processing files: %v", err)
 		}
 
-		// Display statistics
-		stats := processor.GetStats()
-		fmt.Printf("\nStatistics:\n")
-		fmt.Printf("Total files: %d\n", stats.TotalFiles)
-		fmt.Printf("Files by extension:\n")
-		for ext, count := range stats.FilesByExt {
-			fmt.Printf("  %s: %d\n", ext, count)
+		// If not redirected, copy to clipboard
+		if !isRedirected && !listOnly {
+			output := processor.GetOutput()
+			if err := clipboard.WriteAll(output); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: could not copy to clipboard: %v\n", err)
+			} else {
+				fmt.Fprintln(os.Stderr, "Content copied to clipboard!")
+			}
 		}
-		fmt.Printf("Total bytes: %d\n", stats.TotalBytes)
-		fmt.Printf("Total lines: %d\n", stats.TotalLines)
+
+		// Display statistics to stderr
+		stats := processor.GetStats()
+		fmt.Fprintf(os.Stderr, "\nStatistics:\n")
+		fmt.Fprintf(os.Stderr, "Total files: %d\n", stats.TotalFiles)
+		fmt.Fprintf(os.Stderr, "Files by extension:\n")
+		for ext, count := range stats.FilesByExt {
+			fmt.Fprintf(os.Stderr, "  %s: %d\n", ext, count)
+		}
+		fmt.Fprintf(os.Stderr, "Total bytes: %d\n", stats.TotalBytes)
+		fmt.Fprintf(os.Stderr, "Total lines: %d\n", stats.TotalLines)
 
 		return nil
 	},
@@ -103,7 +121,7 @@ func parseSize(sizeStr string) (int64, error) {
 func init() {
 	rootCmd.Flags().StringVarP(&headerFormat, "header-format", "f", "// file: %s", "Format of the header that precedes each file")
 	rootCmd.Flags().StringVarP(&excludePatterns, "exclude", "e", "", "Patterns to exclude files/directories (comma-separated)")
-	rootCmd.Flags().BoolVarP(&listOnly, "list-only", "l", true, "Only list files that would be copied (default: true)")
+	rootCmd.Flags().BoolVarP(&listOnly, "list-only", "l", false, "Only list file paths without showing content")
 	rootCmd.Flags().StringVarP(&maxSize, "max-size", "s", "", "Maximum size of files to be included")
 	rootCmd.Flags().BoolVarP(&stripComments, "strip-comments", "c", false, "Remove comments from code files")
 
