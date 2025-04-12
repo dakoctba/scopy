@@ -57,7 +57,6 @@ scopy [options] extension1 extension2 ...
 |------|-------|-------------|---------|
 | `--header-format` | `-f` | Format of the header preceding each file (default: "// file: %s") | `--header-format "/* %s */"` |
 | `--exclude` | `-e` | Patterns to exclude files/directories (comma-separated) | `--exclude "vendor,dist"` |
-| `--list-only` | `-l` | Only list file paths without showing content | `--list-only` |
 | `--max-size` | `-s` | Maximum size of files to include | `--max-size 500KB` |
 | `--strip-comments` | `-c` | Remove comments from code files | `--strip-comments` |
 
@@ -72,9 +71,6 @@ scopy [options] extension1 extension2 ...
 ```bash
 # Copy content of .go and .js files (default behavior)
 scopy go js
-
-# List only file paths without showing content
-scopy --list-only go js
 
 # Customize header format
 scopy -f "/* %s */" go
@@ -101,10 +97,6 @@ Scopy has different output behaviors depending on how it's used:
    - Content is copied to clipboard
    - Only statistics are shown in the terminal
    - No content is displayed in the terminal
-
-3. **With --list-only flag** (`scopy --list-only go js`):
-   - Only file paths are listed
-   - Statistics are shown in the terminal
 
 ## Clipboard Support
 

@@ -17,7 +17,6 @@ var (
 	// Flags
 	headerFormat    string
 	excludePatterns string
-	listOnly        bool
 	maxSize         string
 	stripComments   bool
 )
@@ -32,7 +31,6 @@ exclusion settings and custom formats.`,
 	Example: `  scopy go js                               # Copy .go and .js files
   scopy --header-format "/* %s */" go       # Customize header format
   scopy --exclude "vendor,dist" go js       # Ignore vendor and dist directories
-  scopy --list-only go                      # List only .go files without showing content
   scopy --max-size 500KB go                 # Ignore .go files larger than 500KB
   scopy --strip-comments go js              # Remove comments from copied files`,
 	Args: cobra.MinimumNArgs(1),
@@ -57,7 +55,6 @@ exclusion settings and custom formats.`,
 		config := pkg.Config{
 			HeaderFormat:    headerFormat,
 			ExcludePatterns: strings.Split(excludePatterns, ","),
-			ListOnly:        listOnly,
 			MaxSize:         maxSizeBytes,
 			StripComments:   stripComments,
 			Extensions:      args,
@@ -71,7 +68,7 @@ exclusion settings and custom formats.`,
 		}
 
 		// If not redirected, copy to clipboard
-		if !isRedirected && !listOnly {
+		if !isRedirected {
 			output := processor.GetOutput()
 			if err := clipboard.WriteAll(output); err != nil {
 				fmt.Fprintf(os.Stderr, "Warning: could not copy to clipboard: %v\n", err)
@@ -121,7 +118,6 @@ func parseSize(sizeStr string) (int64, error) {
 func init() {
 	rootCmd.Flags().StringVarP(&headerFormat, "header-format", "f", "// file: %s", "Format of the header that precedes each file")
 	rootCmd.Flags().StringVarP(&excludePatterns, "exclude", "e", "", "Patterns to exclude files/directories (comma-separated)")
-	rootCmd.Flags().BoolVarP(&listOnly, "list-only", "l", false, "Only list file paths without showing content")
 	rootCmd.Flags().StringVarP(&maxSize, "max-size", "s", "", "Maximum size of files to be included")
 	rootCmd.Flags().BoolVarP(&stripComments, "strip-comments", "c", false, "Remove comments from code files")
 

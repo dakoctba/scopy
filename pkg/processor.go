@@ -13,7 +13,6 @@ import (
 type Config struct {
 	HeaderFormat    string
 	ExcludePatterns []string
-	ListOnly        bool
 	MaxSize         int64
 	StripComments   bool
 	Extensions      []string
@@ -133,16 +132,6 @@ func (p *Processor) Process(baseDir string) error {
 		p.stats.TotalFiles++
 		p.stats.FilesByExt[ext]++
 		p.stats.TotalBytes += info.Size()
-
-		// If only listing, print path and return
-		if p.config.ListOnly {
-			if p.config.OutputToMemory {
-				p.output.WriteString(path + "\n")
-			} else {
-				fmt.Println(path)
-			}
-			return nil
-		}
 
 		// Process file
 		fileCounter++
