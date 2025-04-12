@@ -82,7 +82,7 @@ exclusion settings and custom formats.`,
 
 		// Display statistics to stderr
 		stats := processor.GetStats()
-		fmt.Fprintf(os.Stderr, "\nStatistics:\n")
+		fmt.Fprintf(os.Stderr, "\n")
 		fmt.Fprintf(os.Stderr, "Total files: %d\n", stats.TotalFiles)
 		fmt.Fprintf(os.Stderr, "Files by extension:\n")
 		for ext, count := range stats.FilesByExt {

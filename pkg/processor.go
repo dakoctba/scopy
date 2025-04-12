@@ -1,8 +1,8 @@
 package pkg
 
 import (
+	"bufio"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -55,7 +55,50 @@ func (p *Processor) Process(baseDir string) error {
 		}
 	}
 
-	return filepath.Walk(baseDir, func(path string, info os.FileInfo, err error) error {
+	// Reset total lines count before processing
+	p.stats.TotalLines = 0
+
+	// First, count total files to track the last file
+	totalFiles := 0
+	fileCounter := 0
+
+	// First pass: count eligible files
+	err := filepath.Walk(baseDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Skip directories
+		if info.IsDir() {
+			return nil
+		}
+
+		// Skip files that should be excluded
+		if p.gitIgnore.ShouldIgnore(path) || p.shouldExclude(path) {
+			return nil
+		}
+
+		// Check file extension
+		ext := strings.ToLower(filepath.Ext(path))
+		if !p.hasValidExtension(ext) {
+			return nil
+		}
+
+		// Check maximum size
+		if p.config.MaxSize > 0 && info.Size() > p.config.MaxSize {
+			return nil
+		}
+
+		totalFiles++
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	// Second pass: process files
+	err = filepath.Walk(baseDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -101,9 +144,17 @@ func (p *Processor) Process(baseDir string) error {
 			return nil
 		}
 
-		// Process the file
-		return p.processFile(path)
+		// Process file
+		fileCounter++
+		isLastFile := fileCounter == totalFiles
+		if err := p.processFile(path, isLastFile); err != nil {
+			return err
+		}
+
+		return nil
 	})
+
+	return err
 }
 
 // GetStats returns the processing statistics
@@ -143,7 +194,7 @@ func (p *Processor) hasValidExtension(ext string) bool {
 	return false
 }
 
-func (p *Processor) processFile(path string) error {
+func (p *Processor) processFile(path string, isLastFile bool) error {
 	file, err := os.Open(path)
 	if err != nil {
 		return err
@@ -153,23 +204,41 @@ func (p *Processor) processFile(path string) error {
 	// Format header
 	header := fmt.Sprintf(p.config.HeaderFormat+"\n", path)
 
-	// Write header and content
+	// Count the header line
+	p.stats.TotalLines++
+
+	// Write header
 	if p.config.OutputToMemory {
 		p.output.WriteString(header)
-		content, err := io.ReadAll(file)
-		if err != nil {
-			return err
-		}
-		p.output.Write(content)
-		p.output.WriteString("\n")
 	} else {
-		// Write directly to stdout for redirection
 		fmt.Print(header)
-		_, err = io.Copy(os.Stdout, file)
-		if err != nil {
-			return err
+	}
+
+	// Process content line by line to reduce memory usage
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if p.config.OutputToMemory {
+			p.output.WriteString(line)
+			p.output.WriteString("\n")
+		} else {
+			fmt.Println(line)
 		}
-		fmt.Println() // Add blank line between files
+		p.stats.TotalLines++
+	}
+
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+
+	// Add blank line between files, but not after the last file
+	if !isLastFile {
+		if p.config.OutputToMemory {
+			p.output.WriteString("\n")
+		} else {
+			fmt.Println()
+		}
+		p.stats.TotalLines++
 	}
 
 	return nil
