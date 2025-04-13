@@ -29,7 +29,7 @@ else
 	ARCH := 386
 endif
 
-.PHONY: all build clean test run install uninstall release
+.PHONY: all build clean test run install uninstall release new-release snapshot help
 
 # Alvos padrão
 all: build
@@ -75,6 +75,11 @@ release:
 	@echo "Creating release $(VERSION)..."
 	@bin/release.sh $(ARGS)
 
+# Processo interativo para criar uma nova versão e release
+new-release:
+	@echo "Iniciando processo interativo de criação de nova versão e release..."
+	@bin/update_version.sh
+
 # Criar uma release em modo snapshot (para testes)
 snapshot:
 	@echo "Creating snapshot release..."
@@ -84,18 +89,19 @@ snapshot:
 help:
 	@echo "Makefile para $(BINARY_NAME) - Comandos disponíveis:"
 	@echo ""
-	@echo "  make              - Equivalente a 'make build'"
-	@echo "  make build        - Compilar o projeto para o ambiente local"
-	@echo "  make clean        - Remover arquivos temporários e de build"
-	@echo "  make test         - Executar testes"
-	@echo "  make run ARGS=\"\" - Executar aplicação (passar argumentos em ARGS)"
-	@echo "  make install      - Instalar o binário localmente"
-	@echo "  make uninstall    - Desinstalar o binário"
-	@echo "  make release      - Criar uma release (via GoReleaser)"
-	@echo "  make snapshot     - Criar uma release de teste (não publicada)"
-	@echo "  make help         - Exibir esta mensagem de ajuda"
+	@echo "  make                - Equivalente a 'make build'"
+	@echo "  make build          - Compilar o projeto para o ambiente local"
+	@echo "  make clean          - Remover arquivos temporários e de build"
+	@echo "  make test           - Executar testes"
+	@echo "  make run ARGS=\"\"   - Executar aplicação (passar argumentos em ARGS)"
+	@echo "  make install        - Instalar o binário localmente"
+	@echo "  make uninstall      - Desinstalar o binário"
+	@echo "  make release        - Criar uma release (via GoReleaser)"
+	@echo "  make new-release    - Processo interativo para criar nova versão e release"
+	@echo "  make snapshot       - Criar uma release de teste (não publicada)"
+	@echo "  make help           - Exibir esta mensagem de ajuda"
 	@echo ""
 	@echo "Exemplos:"
 	@echo "  make run ARGS=\"go js --all\""
-	@echo "  make release ARGS=\"--clean\""
+	@echo "  make release ARGS=\"--no-clean\""
 	@echo ""

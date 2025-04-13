@@ -306,18 +306,39 @@ Scopy uses [GoReleaser](https://goreleaser.com) to create releases for multiple 
 ### Requirements
 
 - [GoReleaser](https://goreleaser.com/install/)
-- Git tag with version number
 - GitHub token (configured in `.env` file)
 
-### Creating a New Release
+### Processo de Release Interativo (Recomendado)
 
-1. Create a new Git tag:
+O projeto inclui um processo interativo para criar novas versões e releases:
+
+```bash
+make new-release
+```
+
+Este comando irá:
+1. Mostrar a versão atual (do arquivo VERSION)
+2. Sugerir opções para a próxima versão seguindo Semantic Versioning
+3. Permitir escolher entre patch, minor, major ou uma versão personalizada
+4. Solicitar confirmação da operação
+5. Atualizar o arquivo VERSION
+6. Criar um commit com a nova versão
+7. Criar uma tag Git
+8. Fazer push da tag para o GitHub
+9. Executar o GoReleaser para gerar a release
+
+### Criação Manual de Releases
+
+Se preferir o processo manual, você pode:
+
+1. Editar o arquivo VERSION com a nova versão
+2. Criar uma tag Git:
 ```bash
 git tag -a v1.0.0 -m "Release v1.0.0"
 git push origin v1.0.0
 ```
 
-2. Run the release using Make:
+3. Executar o release:
 ```bash
 make release
 ```
@@ -338,11 +359,6 @@ ou
 ```bash
 bin/release.sh --no-clean
 ```
-
-Este processo irá:
-- Carregar o token do GitHub do arquivo `.env`
-- Executar o GoReleaser para criar uma release no GitHub
-- Gerar binários para macOS (Intel e Apple Silicon), Windows e Linux (amd64 e arm64)
 
 ### Testing a Release
 
