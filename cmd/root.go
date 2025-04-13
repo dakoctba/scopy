@@ -141,18 +141,11 @@ func init() {
 
 	rootCmd.Flags().BoolP("version", "v", false, "Show version number")
 
-	rootCmd.SetVersionTemplate("{{.Name}} version {{.Version}}\n")
+	rootCmd.SetVersionTemplate(`{{.Name}} version {{.Version}}
+build time: ` + buildTime + `
+git commit: ` + gitCommit + `
+`)
 	rootCmd.Version = version
-
-	rootCmd.AddCommand(&cobra.Command{
-		Use:   "version",
-		Short: "Display application version",
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("scopy version %s\n", version)
-			fmt.Printf("build time: %s\n", buildTime)
-			fmt.Printf("git commit: %s\n", gitCommit)
-		},
-	})
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
