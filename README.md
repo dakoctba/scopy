@@ -58,7 +58,7 @@ scopy [options] extension1 extension2 ...
 | `--header-format` | `-f` | Format of the header preceding each file (default: "// file: %s") | `--header-format "/* %s */"` |
 | `--exclude` | `-e` | Patterns to exclude files/directories (comma-separated) | `--exclude "vendor,dist"` |
 | `--max-size` | `-s` | Maximum size of files to include | `--max-size 500KB` |
-| `--strip-comments` | `-c` | Remove comments from code files | `--strip-comments` |
+| `--strip-comments` | `-c` | Remove lines that start with comments from code files (default: false) | `--strip-comments` |
 
 ### Commands
 
@@ -81,7 +81,7 @@ scopy -e "vendor,dist" go js
 # Ignore .go files larger than 500KB
 scopy -s 500KB go
 
-# Remove comments from copied files
+# Remove comment lines from copied files
 scopy -c go js
 ```
 
@@ -126,6 +126,7 @@ At the end of execution, Scopy displays statistics about the processed files dir
 - Number of files per extension
 - Total size in bytes
 - Total number of lines copied
+- Number of comment lines removed (when `--strip-comments` is enabled)
 
 The statistics are always displayed to stderr, ensuring they don't interfere with output redirection.
 
@@ -203,3 +204,30 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [Cobra](https://github.com/spf13/cobra) - Library for creating CLI applications in Go
 - [Go](https://golang.org/) - Programming language
+
+## Comment Stripping
+
+When using the `--strip-comments` flag, Scopy will remove any line that starts with a common comment marker. By default, this feature is disabled.
+
+The following comment markers are recognized:
+
+- `//` (C, C++, Java, JavaScript, Go, etc.)
+- `#` (Python, Ruby, Shell scripts, YAML, etc.)
+- `--` (SQL, Lua, etc.)
+- `;` (Assembly, INI files, etc.)
+- `%` (LaTeX, Matlab, etc.)
+- `/* ... */` (C-style block comments when contained on a single line)
+
+Only complete comment lines are removed. Comments that appear in the middle or at the end of a line will be preserved:
+
+```go
+// This entire line will be removed
+/* This entire line will also be removed */
+
+func main() { // This comment will be kept because it's not at the start of the line
+    fmt.Println("Hello") // This comment will also be kept
+    doSomething() /* This inline comment is kept */
+}
+```
+
+The comment stripping is independent of file extension - the same rules apply to all files.

@@ -29,10 +29,11 @@ type Processor struct {
 
 // Stats contains the processing statistics
 type Stats struct {
-	TotalFiles int
-	FilesByExt map[string]int
-	TotalBytes int64
-	TotalLines int
+	TotalFiles      int
+	FilesByExt      map[string]int
+	TotalBytes      int64
+	TotalLines      int
+	CommentsRemoved int
 }
 
 // NewProcessor creates a new Processor instance
@@ -207,6 +208,14 @@ func (p *Processor) processFile(path string, isLastFile bool) error {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
+
+		// If strip comments is enabled, skip lines that are comments
+		if p.config.StripComments && IsLineComment(line) {
+			// Count removed comment lines
+			p.stats.CommentsRemoved++
+			continue
+		}
+
 		if p.config.OutputToMemory {
 			p.output.WriteString(line)
 			p.output.WriteString("\n")
