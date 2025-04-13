@@ -42,6 +42,7 @@ func NewProcessor(config Config) *Processor {
 		config:    config,
 		stats:     Stats{FilesByExt: make(map[string]int)},
 		gitIgnore: NewGitIgnore(),
+		output:    strings.Builder{},
 	}
 }
 
@@ -216,9 +217,9 @@ func (p *Processor) processFile(path string, isLastFile bool) error {
 			continue
 		}
 
+		// Write the line to output
 		if p.config.OutputToMemory {
-			p.output.WriteString(line)
-			p.output.WriteString("\n")
+			p.output.WriteString(line + "\n")
 		} else {
 			fmt.Println(line)
 		}

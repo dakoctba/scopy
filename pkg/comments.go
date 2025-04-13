@@ -17,6 +17,8 @@ var commonLineCommentMarkers = []string{
 // IsLineComment checks if a line starts with a common comment marker
 // Spaces at the beginning of the line are ignored
 func IsLineComment(line string) bool {
+	// Ensure we're only removing lines that BEGIN with a comment
+	// by checking the trimmed line starts with a comment marker
 	trimmedLine := strings.TrimSpace(line)
 
 	// If the line is empty, it's not a comment
@@ -30,9 +32,9 @@ func IsLineComment(line string) bool {
 	}
 
 	// Check if the line starts with any of the common comment markers
-	// after removing leading whitespace
 	for _, marker := range commonLineCommentMarkers {
 		if strings.HasPrefix(trimmedLine, marker) {
+			// This ensures that comments in the middle or at the end of a line are not detected
 			return true
 		}
 	}
