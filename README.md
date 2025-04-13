@@ -317,17 +317,15 @@ make release
 ```
 
 Este comando irá:
-1. Mostrar a versão atual (do arquivo VERSION)
+1. Mostrar a versão atual (baseada nas tags do Git)
 2. Sugerir opções para a próxima versão seguindo Semantic Versioning
 3. Permitir escolher entre patch, minor, major ou uma versão personalizada
 4. Solicitar confirmação da operação
-5. Atualizar o arquivo VERSION
-6. Criar um commit com a nova versão
-7. Criar uma tag Git
-8. Fazer push da tag para o GitHub
-9. Executar o GoReleaser para gerar a release
+5. Criar uma tag Git
+6. Fazer push da tag para o GitHub
+7. Executar o GoReleaser para gerar a release
 
-Se precisar apenas executar o GoReleaser com o arquivo VERSION atual sem o fluxo interativo, você pode usar o script diretamente:
+Se precisar apenas executar o GoReleaser com a versão atual das tags git sem o fluxo interativo, você pode usar o script diretamente:
 
 ```bash
 bin/release.sh

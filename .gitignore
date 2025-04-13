@@ -28,6 +28,3 @@ dist/
 # Arquivos de sistema
 .DS_Store
 Thumbs.db
-
-# Garantir que o arquivo VERSION seja versionado
-!VERSION

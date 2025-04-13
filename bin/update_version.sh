@@ -7,9 +7,14 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-# Lê a versão atual do arquivo VERSION
-CURRENT_VERSION=$(cat VERSION | tr -d '[:space:]')
-echo -e "${BLUE}Versão atual:${NC} ${GREEN}$CURRENT_VERSION${NC}"
+# Lê a versão atual das tags do git
+CURRENT_VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
+if [ -z "$CURRENT_VERSION" ]; then
+  CURRENT_VERSION="0.0.0"
+  echo -e "${YELLOW}Nenhuma tag de versão encontrada. Usando $CURRENT_VERSION como versão inicial.${NC}"
+else
+  echo -e "${BLUE}Versão atual:${NC} ${GREEN}$CURRENT_VERSION${NC}"
+fi
 
 # Sugere a próxima versão incrementando o patch
 IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
@@ -50,30 +55,20 @@ echo -e "\n${BLUE}Resumo da operação:${NC}"
 echo -e "  De: ${GREEN}$CURRENT_VERSION${NC}"
 echo -e "  Para: ${GREEN}$NEW_VERSION${NC}"
 echo -e "\nIsto irá:"
-echo -e "  1. Atualizar o arquivo VERSION"
-echo -e "  2. Criar uma tag git v$NEW_VERSION"
-echo -e "  3. Fazer push da tag para o repositório remoto"
-echo -e "  4. Gerar uma release usando o GoReleaser"
+echo -e "  1. Criar uma tag git v$NEW_VERSION"
+echo -e "  2. Fazer push da tag para o repositório remoto"
+echo -e "  3. Gerar uma release usando o GoReleaser"
 
 read -p $'\e[1;33mConfirma esta operação? (S/n): \e[0m' CONFIRM
 CONFIRM=${CONFIRM:-S} # Valor padrão é S
 
 if [[ $CONFIRM =~ ^[Ss]$ ]]; then
-  # Atualizar o arquivo VERSION
-  echo "$NEW_VERSION" > VERSION
-  echo -e "\n${GREEN}✓ Arquivo VERSION atualizado para $NEW_VERSION${NC}"
-
-  # Commit da alteração do arquivo VERSION
-  git add VERSION
-  git commit -m "Bump version to $NEW_VERSION"
-  echo -e "${GREEN}✓ Alterações commitadas${NC}"
-
   # Executar o script de release
   echo -e "\n${BLUE}Executando processo de release...${NC}"
 
   # Chamar o script de release passando os argumentos
   # O script release.sh vai cuidar de criar a tag e fazer o push
-  $(dirname "$0")/release.sh
+  $(dirname "$0")/release.sh --version="$NEW_VERSION"
 
   echo -e "\n${GREEN}Processo de versão e release concluído com sucesso!${NC}"
 else
