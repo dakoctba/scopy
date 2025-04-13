@@ -29,7 +29,7 @@ else
 	ARCH := 386
 endif
 
-.PHONY: all build clean test run install uninstall release new-release snapshot help
+.PHONY: all build clean test run install uninstall release snapshot help
 
 # Alvos padrão
 all: build
@@ -70,13 +70,8 @@ uninstall:
 	@rm -f $(shell which $(BINARY_NAME))
 	@echo "Uninstallation completed successfully!"
 
-# Criar uma release usando o GoReleaser
-release:
-	@echo "Creating release $(VERSION)..."
-	@bin/release.sh $(ARGS)
-
 # Processo interativo para criar uma nova versão e release
-new-release:
+release:
 	@echo "Iniciando processo interativo de criação de nova versão e release..."
 	@bin/update_version.sh
 
@@ -96,12 +91,10 @@ help:
 	@echo "  make run ARGS=\"\"   - Executar aplicação (passar argumentos em ARGS)"
 	@echo "  make install        - Instalar o binário localmente"
 	@echo "  make uninstall      - Desinstalar o binário"
-	@echo "  make release        - Criar uma release (via GoReleaser)"
-	@echo "  make new-release    - Processo interativo para criar nova versão e release"
+	@echo "  make release        - Processo interativo para criar nova versão e release"
 	@echo "  make snapshot       - Criar uma release de teste (não publicada)"
 	@echo "  make help           - Exibir esta mensagem de ajuda"
 	@echo ""
 	@echo "Exemplos:"
 	@echo "  make run ARGS=\"go js --all\""
-	@echo "  make release ARGS=\"--no-clean\""
 	@echo ""

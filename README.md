@@ -308,12 +308,12 @@ Scopy uses [GoReleaser](https://goreleaser.com) to create releases for multiple 
 - [GoReleaser](https://goreleaser.com/install/)
 - GitHub token (configured in `.env` file)
 
-### Processo de Release Interativo (Recomendado)
+### Processo de Release
 
 O projeto inclui um processo interativo para criar novas versões e releases:
 
 ```bash
-make new-release
+make release
 ```
 
 Este comando irá:
@@ -327,34 +327,13 @@ Este comando irá:
 8. Fazer push da tag para o GitHub
 9. Executar o GoReleaser para gerar a release
 
-### Criação Manual de Releases
+Se precisar apenas executar o GoReleaser com o arquivo VERSION atual sem o fluxo interativo, você pode usar o script diretamente:
 
-Se preferir o processo manual, você pode:
-
-1. Editar o arquivo VERSION com a nova versão
-2. Criar uma tag Git:
-```bash
-git tag -a v1.0.0 -m "Release v1.0.0"
-git push origin v1.0.0
-```
-
-3. Executar o release:
-```bash
-make release
-```
-
-Ou, alternativamente:
 ```bash
 bin/release.sh
 ```
 
 O atributo `--clean` (que remove o diretório `dist/` antes da compilação) é aplicado por padrão. Se você precisa preservar o diretório `dist/`, use:
-
-```bash
-make release ARGS="--no-clean"
-```
-
-ou
 
 ```bash
 bin/release.sh --no-clean
