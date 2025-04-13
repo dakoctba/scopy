@@ -319,12 +319,24 @@ git push origin v1.0.0
 
 2. Run the release using Make:
 ```bash
-make release ARGS="--clean"
+make release
 ```
 
 Ou, alternativamente:
 ```bash
-bin/release.sh --clean
+bin/release.sh
+```
+
+O atributo `--clean` (que remove o diretório `dist/` antes da compilação) é aplicado por padrão. Se você precisa preservar o diretório `dist/`, use:
+
+```bash
+make release ARGS="--no-clean"
+```
+
+ou
+
+```bash
+bin/release.sh --no-clean
 ```
 
 Este processo irá:
@@ -342,7 +354,7 @@ make snapshot
 
 Ou usando o script diretamente:
 ```bash
-bin/release.sh --snapshot --clean
+bin/release.sh --snapshot
 ```
 
 ### Manual Release (Alternative)
@@ -354,5 +366,5 @@ Se você preferir executar o GoReleaser diretamente:
 export GITHUB_TOKEN=your_github_token_here
 
 # Run GoReleaser
-goreleaser release
+goreleaser release --clean
 ```

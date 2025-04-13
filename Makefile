@@ -78,7 +78,7 @@ release:
 # Criar uma release em modo snapshot (para testes)
 snapshot:
 	@echo "Creating snapshot release..."
-	@bin/release.sh --snapshot --clean
+	@bin/release.sh --snapshot
 
 # Exibir informações de ajuda
 help:

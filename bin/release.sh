@@ -17,7 +17,8 @@ fi
 
 # Parse arguments
 SNAPSHOT=""
-CLEAN=""
+CLEAN="--clean"  # CLEAN é padrão agora
+NO_CLEAN=false   # Nova flag para desativar o CLEAN
 
 for arg in "$@"
 do
@@ -26,8 +27,12 @@ do
     SNAPSHOT="--snapshot"
     shift
     ;;
+    --no-clean)
+    NO_CLEAN=true
+    shift
+    ;;
     --clean)
-    CLEAN="--clean"
+    # Já é o padrão, mas mantemos para compatibilidade
     shift
     ;;
     *)
@@ -36,8 +41,14 @@ do
   esac
 done
 
+# Desativa clean se solicitado explicitamente
+if [ "$NO_CLEAN" = true ]; then
+  CLEAN=""
+fi
+
 # Run GoReleaser
 echo "Running GoReleaser..."
+echo "Options: ${SNAPSHOT} ${CLEAN}"
 goreleaser release $SNAPSHOT $CLEAN
 
 # Unset the token for security
