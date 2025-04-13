@@ -37,12 +37,49 @@ cd scopy
 
 2. Build the project:
 ```bash
+make build
+```
+
+Ou usando Go diretamente:
+```bash
 go build
 ```
 
 3. (Optional) Install the binary:
 ```bash
+make install
+```
+
+Ou usando Go diretamente:
+```bash
 go install
+```
+
+## Development
+
+O projeto inclui um Makefile para facilitar o processo de desenvolvimento:
+
+```bash
+# Compilar o projeto
+make build
+
+# Executar testes
+make test
+
+# Executar o aplicativo com argumentos
+make run ARGS="go js --all"
+
+# Limpar arquivos de build
+make clean
+
+# Instalar localmente
+make install
+
+# Desinstalar
+make uninstall
+
+# Exibir ajuda do Makefile
+make help
 ```
 
 ## Usage
@@ -59,12 +96,15 @@ scopy [options] extension1 extension2 ...
 | `--exclude` | `-e` | Patterns to exclude files/directories (comma-separated) | `--exclude "vendor,dist"` |
 | `--max-size` | `-s` | Maximum size of files to include | `--max-size 500KB` |
 | `--strip-comments` | `-c` | Remove lines that start with comments from code files (default: false) | `--strip-comments` |
+| `--all` | `-a` | Include files & directories beginning with a dot (.) | `--all` |
+| `--follow` | `-F` | Follow symbolic links | `--follow` |
+| `--version` | `-v` | Show version number | `--version` |
 
 ### Commands
 
 | Command | Description | Example |
 |---------|-------------|---------|
-| `version` | Display the application version | `scopy version` |
+| `version` | Display detailed application version | `scopy version` |
 
 ### Examples
 
@@ -83,6 +123,17 @@ scopy -s 500KB go
 
 # Remove comment lines from copied files
 scopy -c go js
+
+# Include hidden files (dot files)
+scopy -a go js
+
+# Follow symbolic links
+scopy -F go js
+
+# Show version information
+scopy -v
+# or
+scopy version
 ```
 
 ## Output Behavior
@@ -266,27 +317,37 @@ git tag -a v1.0.0 -m "Release v1.0.0"
 git push origin v1.0.0
 ```
 
-2. Run the release script:
+2. Run the release using Make:
 ```bash
-./release.sh
+make release ARGS="--clean"
 ```
 
-This script will:
-- Load your GitHub token from the `.env` file
-- Run GoReleaser to create a release on GitHub
-- Generate binaries for macOS (Intel and Apple Silicon) and Linux (amd64 and arm64)
+Ou, alternativamente:
+```bash
+bin/release.sh --clean
+```
+
+Este processo irá:
+- Carregar o token do GitHub do arquivo `.env`
+- Executar o GoReleaser para criar uma release no GitHub
+- Gerar binários para macOS (Intel e Apple Silicon), Windows e Linux (amd64 e arm64)
 
 ### Testing a Release
 
-To test the release process without publishing:
+Para testar o processo de release sem publicar:
 
 ```bash
-./release.sh --snapshot --clean
+make snapshot
+```
+
+Ou usando o script diretamente:
+```bash
+bin/release.sh --snapshot --clean
 ```
 
 ### Manual Release (Alternative)
 
-If you prefer to run GoReleaser directly:
+Se você preferir executar o GoReleaser diretamente:
 
 ```bash
 # Export your GitHub token
