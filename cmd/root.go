@@ -88,6 +88,11 @@ exclusion settings and custom formats.`,
 		fmt.Fprintf(os.Stderr, "Total bytes: %d\n", stats.TotalBytes)
 		fmt.Fprintf(os.Stderr, "Total lines: %d\n", stats.TotalLines)
 
+		// Show comment removal statistics if strip-comments was enabled
+		if stripComments && stats.CommentsRemoved > 0 {
+			fmt.Fprintf(os.Stderr, "Removed lines (comments): %d\n", stats.CommentsRemoved)
+		}
+
 		return nil
 	},
 }
