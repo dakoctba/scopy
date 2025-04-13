@@ -10,6 +10,7 @@
 
 # Diretórios de saída
 bin/
+!bin/release.sh
 dist/
 
 # Arquivos de ambiente
