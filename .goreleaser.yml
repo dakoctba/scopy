@@ -21,6 +21,7 @@ builds:
     goos:
       - linux
       - darwin
+      - windows
     goarch:
       - amd64
       - arm64
@@ -49,9 +50,11 @@ archives:
     # Default format is tar.gz
     formats: [tar.gz]
 
-    # Use zip for macOS
+    # Use zip for macOS and Windows
     format_overrides:
       - goos: darwin
+        formats: [zip]
+      - goos: windows
         formats: [zip]
 
 checksum:
@@ -62,10 +65,13 @@ release:
   github:
     owner: dakoctba
     name: scopy
-  draft: true
+  draft: false  # Publicação automática
   prerelease: auto
   name_template: "{{ .ProjectName }} v{{ .Version }}"
   mode: replace
+  # Configurar para garantir que os binários sejam publicados
+  ids:
+    - scopy
 
 # Explicitly define what to publish
 # Include source code and built binaries
