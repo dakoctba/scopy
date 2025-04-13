@@ -2,7 +2,7 @@
 
 # Variáveis
 BINARY_NAME=scopy
-VERSION=$(shell git describe --tags --abbrev=0 2>/dev/null || echo "dev")
+VERSION=$(shell git tag -l --sort=-v:refname | head -n 1 | sed 's/^v//' 2>/dev/null || echo "dev")
 GIT_COMMIT=$(shell git rev-parse --short HEAD)
 BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 LDFLAGS=-ldflags "-X github.com/dakoctba/scopy/cmd.version=$(VERSION) -X github.com/dakoctba/scopy/cmd.buildTime=$(BUILD_TIME) -X github.com/dakoctba/scopy/cmd.gitCommit=$(GIT_COMMIT)"

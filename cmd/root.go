@@ -146,6 +146,74 @@ build time: ` + buildTime + `
 git commit: ` + gitCommit + `
 `)
 	rootCmd.Version = version
+
+	// Permitir que o comando completion apareça
+	rootCmd.CompletionOptions.DisableDefaultCmd = false
+
+	// Configurar um template de ajuda personalizado que não liste o comando help
+	const customHelpTemplate = `{{with (or .Long .Short)}}{{. | trimTrailingWhitespaces}}
+
+{{end}}{{if or .Runnable .HasSubCommands}}{{.UsageString}}{{end}}`
+
+	// Sobrescrever template para omitir o comando help, mas mostrar completion
+	const customUsageTemplate = `Usage:{{if .Runnable}}
+  {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
+  {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
+
+Aliases:
+  {{.NameAndAliases}}{{end}}{{if .HasExample}}
+
+Examples:
+{{.Example}}{{end}}{{if .HasAvailableSubCommands}}
+
+Available Commands:{{range .Commands}}{{if (and (not .Hidden) (ne .Name "help"))}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+
+Flags:
+{{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+
+Global Flags:
+{{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasHelpSubCommands}}
+
+Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
+  {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
+
+Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
+`
+
+	// Aplicar os templates personalizados
+	rootCmd.SetHelpTemplate(customHelpTemplate)
+	rootCmd.SetUsageTemplate(customUsageTemplate)
+
+	// Remover o comando help padrão
+	rootCmd.SetHelpCommand(&cobra.Command{
+		Use:    "hidden-help",
+		Hidden: true,
+	})
+
+	// Adicionar comando help oculto (para funcionar se alguém digitar 'help')
+	helpCmd := &cobra.Command{
+		Use:    "help",
+		Short:  "Help about any command",
+		Hidden: true,
+		Run: func(c *cobra.Command, args []string) {
+			rootCmd.Help()
+		},
+	}
+	rootCmd.AddCommand(helpCmd)
+
+	// Adicionar o comando version, mas oculto
+	versionCmd := &cobra.Command{
+		Use:    "version",
+		Short:  "Display application version",
+		Hidden: true, // Não aparece na ajuda
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Printf("scopy version %s\n", version)
+			fmt.Printf("build time: %s\n", buildTime)
+			fmt.Printf("git commit: %s\n", gitCommit)
+		},
+	}
+	rootCmd.AddCommand(versionCmd)
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

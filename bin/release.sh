@@ -15,16 +15,12 @@ if [ -z "$GITHUB_TOKEN" ]; then
   exit 1
 fi
 
-# Get version from VERSION file
-VERSION=$(cat VERSION | tr -d '[:space:]')
-TAG="v$VERSION"
-echo "Using version $VERSION (tag $TAG) from VERSION file"
-
 # Parse arguments
 SNAPSHOT=""
 CLEAN="--clean"  # CLEAN é padrão agora
 NO_CLEAN=false   # Nova flag para desativar o CLEAN
 SKIP_TAG=false   # Opção para pular criação/verificação de tag
+VERSION_ARG=""
 
 for arg in "$@"
 do
@@ -45,11 +41,31 @@ do
     SKIP_TAG=true
     shift
     ;;
+    --version=*)
+    VERSION_ARG="${arg#*=}"
+    shift
+    ;;
     *)
     # Unknown option
     ;;
   esac
 done
+
+# Determina a versão a ser usada
+if [ -n "$VERSION_ARG" ]; then
+  # Usa a versão fornecida como argumento
+  VERSION="$VERSION_ARG"
+else
+  # Obtém a versão da última tag git (ordenando por versão semântica)
+  VERSION=$(git tag -l --sort=-v:refname | head -n 1 | sed 's/^v//')
+  if [ -z "$VERSION" ]; then
+    echo "Error: No version specified and no git tags found"
+    exit 1
+  fi
+fi
+
+TAG="v$VERSION"
+echo "Using version $VERSION (tag $TAG)"
 
 # Desativa clean se solicitado explicitamente
 if [ "$NO_CLEAN" = true ]; then
