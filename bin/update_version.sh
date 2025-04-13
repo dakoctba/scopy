@@ -7,8 +7,8 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-# Lê a versão atual das tags do git
-CURRENT_VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
+# Lê a versão atual das tags do git (ordena por versão semântica e pega a mais recente)
+CURRENT_VERSION=$(git tag -l --sort=-v:refname | head -n 1 | sed 's/^v//')
 if [ -z "$CURRENT_VERSION" ]; then
   CURRENT_VERSION="0.0.0"
   echo -e "${YELLOW}Nenhuma tag de versão encontrada. Usando $CURRENT_VERSION como versão inicial.${NC}"

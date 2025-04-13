@@ -56,8 +56,8 @@ if [ -n "$VERSION_ARG" ]; then
   # Usa a versão fornecida como argumento
   VERSION="$VERSION_ARG"
 else
-  # Obtém a versão da última tag git
-  VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
+  # Obtém a versão da última tag git (ordenando por versão semântica)
+  VERSION=$(git tag -l --sort=-v:refname | head -n 1 | sed 's/^v//')
   if [ -z "$VERSION" ]; then
     echo "Error: No version specified and no git tags found"
     exit 1
