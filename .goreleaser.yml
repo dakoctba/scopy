@@ -1,0 +1,77 @@
+# .goreleaser.yml
+# Configuration for GoReleaser
+# https://goreleaser.com
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+
+version: 2
+
+project_name: scopy
+
+before:
+  hooks:
+    # You may remove this if you don't use go modules
+    - go mod tidy
+
+builds:
+  -
+    # Main build
+    id: scopy
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X github.com/dakoctba/scopy/cmd.version={{.Version}} -X github.com/dakoctba/scopy/cmd.buildTime={{.Date}} -X github.com/dakoctba/scopy/cmd.gitCommit={{.Commit}}
+    main: ./
+    binary: scopy
+
+archives:
+  -
+    # this name template makes the OS and Arch compatible with the results of `uname`.
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+
+    # Archive settings
+    id: scopy
+    files:
+      - LICENSE
+      - README.md
+
+    # Default format is tar.gz
+    formats: [tar.gz]
+
+    # Use zip for macOS
+    format_overrides:
+      - goos: darwin
+        formats: [zip]
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
+
+release:
+  github:
+    owner: dakoctba
+    name: scopy
+  draft: true
+  prerelease: auto
+  name_template: "{{ .ProjectName }} v{{ .Version }}"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - Merge pull request
+      - Merge branch
