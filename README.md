@@ -1,6 +1,6 @@
 # Scopy - Smart Copy
 
-Scopy is a command-line tool written in Go that allows you to intelligently copy the content of files with specific extensions, respecting exclusion settings and custom formats.
+Scopy is a command-line tool that allows you to intelligently copy the content of files with specific extensions, respecting exclusion settings and custom formats.
 
 ## Features
 
@@ -17,70 +17,15 @@ Scopy is a command-line tool written in Go that allows you to intelligently copy
 
 ## Installation
 
-### Prerequisites
-
-- Go 1.21 or higher
-
 ### Installation via go install
 
 ```bash
 go install github.com/dakoctba/scopy@latest
 ```
 
-### Manual Installation
+### Download Binaries
 
-1. Clone the repository:
-```bash
-git clone https://github.com/dakoctba/scopy.git
-cd scopy
-```
-
-2. Build the project:
-```bash
-make build
-```
-
-Ou usando Go diretamente:
-```bash
-go build
-```
-
-3. (Optional) Install the binary:
-```bash
-make install
-```
-
-Ou usando Go diretamente:
-```bash
-go install
-```
-
-## Development
-
-O projeto inclui um Makefile para facilitar o processo de desenvolvimento:
-
-```bash
-# Compilar o projeto
-make build
-
-# Executar testes
-make test
-
-# Executar o aplicativo com argumentos
-make run ARGS="go js --all"
-
-# Limpar arquivos de build
-make clean
-
-# Instalar localmente
-make install
-
-# Desinstalar
-make uninstall
-
-# Exibir ajuda do Makefile
-make help
-```
+Visit the [releases page](https://github.com/dakoctba/scopy/releases) to download the latest version compiled for your operating system.
 
 ## Usage
 
@@ -141,11 +86,11 @@ scopy version
 Scopy has different output behaviors depending on how it's used:
 
 1. **With redirection** (`scopy go js > output.txt`):
-   - Content is written to stdout (redirected to file)
+   - Content is written to stdout (redirected to the file)
    - Statistics are shown in the terminal (stderr)
 
 2. **Without redirection** (`scopy go js`):
-   - Content is copied to clipboard
+   - Content is copied to the clipboard
    - Only statistics are shown in the terminal
    - No content is displayed in the terminal
 
@@ -154,7 +99,7 @@ Scopy has different output behaviors depending on how it's used:
 When running Scopy without output redirection, the content of the files is automatically copied to your system's clipboard. This makes it easy to paste the content into any application.
 
 The terminal will only display:
-1. A confirmation message when content is copied to clipboard
+1. A confirmation message when content is copied to the clipboard
 2. Statistics about the processed files
 
 ## Gitignore Support
@@ -189,73 +134,6 @@ The statistics are always displayed to stderr, ensuring they don't interfere wit
 | 1 | Usage error (invalid arguments) |
 | 2 | Error reading/processing files |
 
-## Project Structure
-
-```
-.
-├── cmd/
-│   └── root.go      # Main command and configurations
-├── pkg/
-│   ├── processor.go # File processing logic
-│   └── processor_test.go # Unit tests
-├── main.go          # Entry point
-├── go.mod           # Dependency management
-└── README.md        # Documentation
-```
-
-## Development
-
-### Development Requirements
-
-- Go 1.21 or higher
-- Git
-
-### Environment Setup
-
-1. Clone the repository:
-```bash
-git clone https://github.com/dakoctba/scopy.git
-cd scopy
-```
-
-2. Install dependencies:
-```bash
-go mod tidy
-```
-
-### Running Tests
-
-```bash
-go test ./pkg/...
-```
-
-### Building the Project
-
-```bash
-go build
-```
-
-## Contributing
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Author
-
-- **Jackson** - [dakoctba](https://github.com/dakoctba)
-
-## Acknowledgments
-
-- [Cobra](https://github.com/spf13/cobra) - Library for creating CLI applications in Go
-- [Go](https://golang.org/) - Programming language
-
 ## Comment Stripping
 
 When using the `--strip-comments` flag, Scopy will remove any line that starts with a common comment marker. By default, this feature is disabled.
@@ -283,81 +161,19 @@ func main() { // This comment will be kept because it's not at the start of the 
 
 The comment stripping is independent of file extension - the same rules apply to all files.
 
-## Environment Setup
+## Developer Documentation
 
-Scopy uses environment variables for configuration. These can be set using a `.env` file:
+For information about development, compilation, and source code, see the [developer documentation](docs/README.md).
 
-1. Copy the example environment file:
-```bash
-cp .env.example .env
-```
+## License
 
-2. Edit the `.env` file and add your GitHub token:
-```
-GITHUB_TOKEN=your_github_token_here
-```
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-The application will automatically load these variables when it starts.
+## Author
 
-## Releasing
+- **Jackson** - [dakoctba](https://github.com/dakoctba)
 
-Scopy uses [GoReleaser](https://goreleaser.com) to create releases for multiple platforms.
+## Acknowledgments
 
-### Requirements
-
-- [GoReleaser](https://goreleaser.com/install/)
-- GitHub token (configured in `.env` file)
-
-### Processo de Release
-
-O projeto inclui um processo interativo para criar novas versões e releases:
-
-```bash
-make release
-```
-
-Este comando irá:
-1. Mostrar a versão atual (baseada nas tags do Git)
-2. Sugerir opções para a próxima versão seguindo Semantic Versioning
-3. Permitir escolher entre patch, minor, major ou uma versão personalizada
-4. Solicitar confirmação da operação
-5. Criar uma tag Git
-6. Fazer push da tag para o GitHub
-7. Executar o GoReleaser para gerar a release
-
-Se precisar apenas executar o GoReleaser com a versão atual das tags git sem o fluxo interativo, você pode usar o script diretamente:
-
-```bash
-bin/release.sh
-```
-
-O atributo `--clean` (que remove o diretório `dist/` antes da compilação) é aplicado por padrão. Se você precisa preservar o diretório `dist/`, use:
-
-```bash
-bin/release.sh --no-clean
-```
-
-### Testing a Release
-
-Para testar o processo de release sem publicar:
-
-```bash
-make snapshot
-```
-
-Ou usando o script diretamente:
-```bash
-bin/release.sh --snapshot
-```
-
-### Manual Release (Alternative)
-
-Se você preferir executar o GoReleaser diretamente:
-
-```bash
-# Export your GitHub token
-export GITHUB_TOKEN=your_github_token_here
-
-# Run GoReleaser
-goreleaser release --clean
-```
+- [Cobra](https://github.com/spf13/cobra) - Library for creating CLI applications in Go
+- [Go](https://golang.org/) - Programming language
