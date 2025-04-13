@@ -232,6 +232,22 @@ func main() { // This comment will be kept because it's not at the start of the 
 
 The comment stripping is independent of file extension - the same rules apply to all files.
 
+## Environment Setup
+
+Scopy uses environment variables for configuration. These can be set using a `.env` file:
+
+1. Copy the example environment file:
+```bash
+cp .env.example .env
+```
+
+2. Edit the `.env` file and add your GitHub token:
+```
+GITHUB_TOKEN=your_github_token_here
+```
+
+The application will automatically load these variables when it starts.
+
 ## Releasing
 
 Scopy uses [GoReleaser](https://goreleaser.com) to create releases for multiple platforms.
@@ -240,6 +256,7 @@ Scopy uses [GoReleaser](https://goreleaser.com) to create releases for multiple 
 
 - [GoReleaser](https://goreleaser.com/install/)
 - Git tag with version number
+- GitHub token (configured in `.env` file)
 
 ### Creating a New Release
 
@@ -249,19 +266,32 @@ git tag -a v1.0.0 -m "Release v1.0.0"
 git push origin v1.0.0
 ```
 
-2. Run GoReleaser:
+2. Run the release script:
 ```bash
-goreleaser release
+./release.sh
 ```
 
-This will create a release on GitHub with binaries for:
-- macOS (Intel and Apple Silicon)
-- Linux (amd64 and arm64)
+This script will:
+- Load your GitHub token from the `.env` file
+- Run GoReleaser to create a release on GitHub
+- Generate binaries for macOS (Intel and Apple Silicon) and Linux (amd64 and arm64)
 
 ### Testing a Release
 
 To test the release process without publishing:
 
 ```bash
-goreleaser release --snapshot --clean
+./release.sh --snapshot --clean
+```
+
+### Manual Release (Alternative)
+
+If you prefer to run GoReleaser directly:
+
+```bash
+# Export your GitHub token
+export GITHUB_TOKEN=your_github_token_here
+
+# Run GoReleaser
+goreleaser release
 ```

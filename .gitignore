@@ -15,6 +15,7 @@ dist/
 # Arquivos de ambiente
 .env
 .env.local
+.env.*.local
 
 # Arquivos de IDE
 .idea/
