@@ -15,10 +15,16 @@ if [ -z "$GITHUB_TOKEN" ]; then
   exit 1
 fi
 
+# Get version from VERSION file
+VERSION=$(cat VERSION | tr -d '[:space:]')
+TAG="v$VERSION"
+echo "Using version $VERSION (tag $TAG) from VERSION file"
+
 # Parse arguments
 SNAPSHOT=""
 CLEAN="--clean"  # CLEAN é padrão agora
 NO_CLEAN=false   # Nova flag para desativar o CLEAN
+SKIP_TAG=false   # Opção para pular criação/verificação de tag
 
 for arg in "$@"
 do
@@ -35,6 +41,10 @@ do
     # Já é o padrão, mas mantemos para compatibilidade
     shift
     ;;
+    --skip-tag)
+    SKIP_TAG=true
+    shift
+    ;;
     *)
     # Unknown option
     ;;
@@ -44,6 +54,18 @@ done
 # Desativa clean se solicitado explicitamente
 if [ "$NO_CLEAN" = true ]; then
   CLEAN=""
+fi
+
+# Cria tag se ela não existir e não estamos no modo snapshot e não foi pedido para pular
+if [ -z "$SNAPSHOT" ] && [ "$SKIP_TAG" != true ]; then
+  if ! git rev-parse "$TAG" >/dev/null 2>&1; then
+    echo "Creating git tag $TAG..."
+    git tag -a "$TAG" -m "Version $VERSION"
+    echo "Pushing tag to remote..."
+    git push origin "$TAG"
+  else
+    echo "Tag $TAG already exists, using existing tag"
+  fi
 fi
 
 # Run GoReleaser
