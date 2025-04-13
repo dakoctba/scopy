@@ -65,6 +65,17 @@ release:
   draft: true
   prerelease: auto
   name_template: "{{ .ProjectName }} v{{ .Version }}"
+  mode: replace
+
+# Explicitly define what to publish
+# Include source code and built binaries
+source:
+  enabled: true
+  name_template: '{{ .ProjectName }}-{{ .Version }}'
+
+# Skip the upload for snapshots
+snapshot:
+  name_template: "{{ incpatch .Version }}-SNAPSHOT-{{.ShortCommit}}"
 
 changelog:
   sort: asc
