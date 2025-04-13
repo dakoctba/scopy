@@ -17,6 +17,8 @@ type Config struct {
 	StripComments   bool
 	Extensions      []string
 	OutputToMemory  bool
+	IncludeDotFiles bool // Incluir arquivos que começam com ponto (.)
+	FollowSymlinks  bool // Seguir links simbólicos
 }
 
 // Processor is responsible for processing files
@@ -63,14 +65,29 @@ func (p *Processor) Process(baseDir string) error {
 	totalFiles := 0
 	fileCounter := 0
 
-	// First pass: count eligible files
-	err := filepath.Walk(baseDir, func(path string, info os.FileInfo, err error) error {
+	// Configuração para a caminhada no sistema de arquivos
+	walkFunc := func(path string, info os.FileInfo, err error) error {
 		if err != nil {
+			// Se não seguimos links simbólicos e este for um erro de link simbólico, ignore
+			if !p.config.FollowSymlinks && os.IsNotExist(err) {
+				return nil
+			}
 			return err
 		}
 
-		// Skip directories
+		// Se for um diretório, verifique se deve ser ignorado
 		if info.IsDir() {
+			// Ignora diretórios que começam com . a menos que includeDotFiles esteja ativado
+			baseName := filepath.Base(path)
+			if !p.config.IncludeDotFiles && strings.HasPrefix(baseName, ".") && path != "." {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+		// Ignora arquivos que começam com . a menos que includeDotFiles esteja ativado
+		baseName := filepath.Base(path)
+		if !p.config.IncludeDotFiles && strings.HasPrefix(baseName, ".") {
 			return nil
 		}
 
@@ -92,20 +109,80 @@ func (p *Processor) Process(baseDir string) error {
 
 		totalFiles++
 		return nil
-	})
-
-	if err != nil {
-		return err
 	}
 
-	// Second pass: process files
-	err = filepath.Walk(baseDir, func(path string, info os.FileInfo, err error) error {
+	// Primeira passagem: contagem de arquivos elegíveis
+	if p.config.FollowSymlinks {
+		err := filepath.Walk(baseDir, func(path string, info os.FileInfo, err error) error {
+			// Implementação personalizada para seguir links simbólicos
+			if err != nil {
+				return err
+			}
+
+			// Se for um link simbólico
+			if info.Mode()&os.ModeSymlink != 0 {
+				// Resolve o link simbólico
+				realPath, err := os.Readlink(path)
+				if err != nil {
+					return nil // Ignora erro ao ler o link
+				}
+
+				// Se for um caminho relativo, torna-o absoluto
+				if !filepath.IsAbs(realPath) {
+					realPath = filepath.Join(filepath.Dir(path), realPath)
+				}
+
+				// Obtém informações sobre o destino do link
+				destInfo, err := os.Stat(realPath)
+				if err != nil {
+					return nil // Ignora erro ao acessar o destino do link
+				}
+
+				// Se o destino for um diretório, processa-o recursivamente
+				if destInfo.IsDir() {
+					return filepath.Walk(realPath, walkFunc)
+				}
+
+				// Se for um arquivo, processa-o normalmente usando o destino do link
+				return walkFunc(realPath, destInfo, nil)
+			}
+
+			// Para arquivos e diretórios normais, usa a função de caminhada padrão
+			return walkFunc(path, info, err)
+		})
 		if err != nil {
 			return err
 		}
+	} else {
+		err := filepath.Walk(baseDir, walkFunc)
+		if err != nil {
+			return err
+		}
+	}
 
-		// Ignore directories
+	// Segunda passagem: processamento de arquivos
+	processFunc := func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			// Se não seguimos links simbólicos e este for um erro de link simbólico, ignore
+			if !p.config.FollowSymlinks && os.IsNotExist(err) {
+				return nil
+			}
+			return err
+		}
+
+		// Ignora diretórios
 		if info.IsDir() {
+			// Ignora diretórios que começam com . a menos que includeDotFiles esteja ativado
+			baseName := filepath.Base(path)
+			if !p.config.IncludeDotFiles && strings.HasPrefix(baseName, ".") && path != "." {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+		// Ignora arquivos que começam com . a menos que includeDotFiles esteja ativado
+		baseName := filepath.Base(path)
+		if !p.config.IncludeDotFiles && strings.HasPrefix(baseName, ".") {
 			return nil
 		}
 
@@ -143,9 +220,51 @@ func (p *Processor) Process(baseDir string) error {
 		}
 
 		return nil
-	})
+	}
 
-	return err
+	// Segunda passagem: processa os arquivos
+	if p.config.FollowSymlinks {
+		err := filepath.Walk(baseDir, func(path string, info os.FileInfo, err error) error {
+			// Implementação personalizada para seguir links simbólicos
+			if err != nil {
+				return err
+			}
+
+			// Se for um link simbólico
+			if info.Mode()&os.ModeSymlink != 0 {
+				// Resolve o link simbólico
+				realPath, err := os.Readlink(path)
+				if err != nil {
+					return nil // Ignora erro ao ler o link
+				}
+
+				// Se for um caminho relativo, torna-o absoluto
+				if !filepath.IsAbs(realPath) {
+					realPath = filepath.Join(filepath.Dir(path), realPath)
+				}
+
+				// Obtém informações sobre o destino do link
+				destInfo, err := os.Stat(realPath)
+				if err != nil {
+					return nil // Ignora erro ao acessar o destino do link
+				}
+
+				// Se o destino for um diretório, processa-o recursivamente
+				if destInfo.IsDir() {
+					return filepath.Walk(realPath, processFunc)
+				}
+
+				// Se for um arquivo, processa-o normalmente usando o destino do link
+				return processFunc(realPath, destInfo, nil)
+			}
+
+			// Para arquivos e diretórios normais, usa a função de processamento padrão
+			return processFunc(path, info, err)
+		})
+		return err
+	} else {
+		return filepath.Walk(baseDir, processFunc)
+	}
 }
 
 // GetStats returns the processing statistics

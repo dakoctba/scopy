@@ -12,13 +12,19 @@ import (
 )
 
 var (
-	version = "0.1.0"
+	// Versão padrão que será substituída pelo GoReleaser durante a compilação
+	// através da flag -X github.com/dakoctba/scopy/cmd.version
+	version   = "unknown"
+	buildTime = "unknown"
+	gitCommit = "unknown"
 
 	// Flags
 	headerFormat    string
 	excludePatterns string
 	maxSize         string
 	stripComments   bool
+	includeDotFiles bool
+	followSymlinks  bool
 )
 
 // rootCmd represents the base command
@@ -32,7 +38,9 @@ exclusion settings and custom formats.`,
   scopy --header-format "/* %s */" go       # Customize header format
   scopy --exclude "vendor,dist" go js       # Ignore vendor and dist directories
   scopy --max-size 500KB go                 # Ignore .go files larger than 500KB
-  scopy --strip-comments go js              # Remove comments from copied files`,
+  scopy --strip-comments go js              # Remove comments from copied files
+  scopy --all go                            # Include dot files (hidden files)
+  scopy --follow go                         # Follow symbolic links`,
 	Args: cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Convert maximum size to bytes
@@ -59,6 +67,8 @@ exclusion settings and custom formats.`,
 			StripComments:   stripComments,
 			Extensions:      args,
 			OutputToMemory:  !isRedirected, // Store in memory if NOT redirected
+			IncludeDotFiles: includeDotFiles,
+			FollowSymlinks:  followSymlinks,
 		}
 
 		processor := pkg.NewProcessor(config)
@@ -126,12 +136,21 @@ func init() {
 	rootCmd.Flags().StringVarP(&maxSize, "max-size", "s", "", "Maximum size of files to be included")
 	rootCmd.Flags().BoolVarP(&stripComments, "strip-comments", "c", false, "Remove comments from code files")
 
-	// Add version command
+	rootCmd.Flags().BoolVarP(&includeDotFiles, "all", "a", false, "Include files & directories beginning with a dot (.)")
+	rootCmd.Flags().BoolVarP(&followSymlinks, "follow", "F", false, "Follow symbolic links")
+
+	rootCmd.Flags().BoolP("version", "v", false, "Show version number")
+
+	rootCmd.SetVersionTemplate("{{.Name}} version {{.Version}}\n")
+	rootCmd.Version = version
+
 	rootCmd.AddCommand(&cobra.Command{
 		Use:   "version",
 		Short: "Display application version",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Printf("scopy version %s\n", version)
+			fmt.Printf("build time: %s\n", buildTime)
+			fmt.Printf("git commit: %s\n", gitCommit)
 		},
 	})
 }

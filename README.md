@@ -37,12 +37,49 @@ cd scopy
 
 2. Build the project:
 ```bash
+make build
+```
+
+Ou usando Go diretamente:
+```bash
 go build
 ```
 
 3. (Optional) Install the binary:
 ```bash
+make install
+```
+
+Ou usando Go diretamente:
+```bash
 go install
+```
+
+## Development
+
+O projeto inclui um Makefile para facilitar o processo de desenvolvimento:
+
+```bash
+# Compilar o projeto
+make build
+
+# Executar testes
+make test
+
+# Executar o aplicativo com argumentos
+make run ARGS="go js --all"
+
+# Limpar arquivos de build
+make clean
+
+# Instalar localmente
+make install
+
+# Desinstalar
+make uninstall
+
+# Exibir ajuda do Makefile
+make help
 ```
 
 ## Usage
@@ -59,12 +96,15 @@ scopy [options] extension1 extension2 ...
 | `--exclude` | `-e` | Patterns to exclude files/directories (comma-separated) | `--exclude "vendor,dist"` |
 | `--max-size` | `-s` | Maximum size of files to include | `--max-size 500KB` |
 | `--strip-comments` | `-c` | Remove lines that start with comments from code files (default: false) | `--strip-comments` |
+| `--all` | `-a` | Include files & directories beginning with a dot (.) | `--all` |
+| `--follow` | `-F` | Follow symbolic links | `--follow` |
+| `--version` | `-v` | Show version number | `--version` |
 
 ### Commands
 
 | Command | Description | Example |
 |---------|-------------|---------|
-| `version` | Display the application version | `scopy version` |
+| `version` | Display detailed application version | `scopy version` |
 
 ### Examples
 
@@ -83,6 +123,17 @@ scopy -s 500KB go
 
 # Remove comment lines from copied files
 scopy -c go js
+
+# Include hidden files (dot files)
+scopy -a go js
+
+# Follow symbolic links
+scopy -F go js
+
+# Show version information
+scopy -v
+# or
+scopy version
 ```
 
 ## Output Behavior
@@ -255,43 +306,60 @@ Scopy uses [GoReleaser](https://goreleaser.com) to create releases for multiple 
 ### Requirements
 
 - [GoReleaser](https://goreleaser.com/install/)
-- Git tag with version number
 - GitHub token (configured in `.env` file)
 
-### Creating a New Release
+### Processo de Release
 
-1. Create a new Git tag:
+O projeto inclui um processo interativo para criar novas versões e releases:
+
 ```bash
-git tag -a v1.0.0 -m "Release v1.0.0"
-git push origin v1.0.0
+make release
 ```
 
-2. Run the release script:
+Este comando irá:
+1. Mostrar a versão atual (do arquivo VERSION)
+2. Sugerir opções para a próxima versão seguindo Semantic Versioning
+3. Permitir escolher entre patch, minor, major ou uma versão personalizada
+4. Solicitar confirmação da operação
+5. Atualizar o arquivo VERSION
+6. Criar um commit com a nova versão
+7. Criar uma tag Git
+8. Fazer push da tag para o GitHub
+9. Executar o GoReleaser para gerar a release
+
+Se precisar apenas executar o GoReleaser com o arquivo VERSION atual sem o fluxo interativo, você pode usar o script diretamente:
+
 ```bash
-./release.sh
+bin/release.sh
 ```
 
-This script will:
-- Load your GitHub token from the `.env` file
-- Run GoReleaser to create a release on GitHub
-- Generate binaries for macOS (Intel and Apple Silicon) and Linux (amd64 and arm64)
+O atributo `--clean` (que remove o diretório `dist/` antes da compilação) é aplicado por padrão. Se você precisa preservar o diretório `dist/`, use:
+
+```bash
+bin/release.sh --no-clean
+```
 
 ### Testing a Release
 
-To test the release process without publishing:
+Para testar o processo de release sem publicar:
 
 ```bash
-./release.sh --snapshot --clean
+make snapshot
+```
+
+Ou usando o script diretamente:
+```bash
+bin/release.sh --snapshot
 ```
 
 ### Manual Release (Alternative)
 
-If you prefer to run GoReleaser directly:
+Se você preferir executar o GoReleaser diretamente:
 
 ```bash
 # Export your GitHub token
 export GITHUB_TOKEN=your_github_token_here
 
 # Run GoReleaser
-goreleaser release
+goreleaser release --clean
 ```

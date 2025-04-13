@@ -10,6 +10,8 @@
 
 # Diretórios de saída
 bin/
+!bin/release.sh
+!bin/update_version.sh
 dist/
 
 # Arquivos de ambiente
@@ -26,3 +28,6 @@ dist/
 # Arquivos de sistema
 .DS_Store
 Thumbs.db
+
+# Garantir que o arquivo VERSION seja versionado
+!VERSION
