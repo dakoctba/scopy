@@ -12,7 +12,11 @@ import (
 )
 
 var (
-	version = "0.1.0"
+	// Versão padrão que será substituída pelo GoReleaser durante a compilação
+	// através da flag -X github.com/dakoctba/scopy/cmd.version
+	version   = "unknown"
+	buildTime = "unknown"
+	gitCommit = "unknown"
 
 	// Flags
 	headerFormat    string
@@ -145,6 +149,8 @@ func init() {
 		Short: "Display application version",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Printf("scopy version %s\n", version)
+			fmt.Printf("build time: %s\n", buildTime)
+			fmt.Printf("git commit: %s\n", gitCommit)
 		},
 	})
 }
